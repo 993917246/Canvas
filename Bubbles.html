@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <style>
+    *{
+      padding: 0;
+      margin: 0;
+    }
+    body {
+      overflow: hidden;
+    }
+    canvas {
+      background-color: #000;
+    }
+  </style>
+</head>
+<body>
+  <canvas id="canvas"></canvas>
+
+  <script>
+    const canvas = document.getElementById('canvas')
+    const pan = canvas.getContext('2d')
+    canvas.width = window.innerWidth
+    canvas.height = window.innerHeight
+
+    class Arc {
+      /**
+       * x ： 圆心x
+       * y ： 圆心y
+       * r ： 随机生成半径
+       * a ： 透明度
+       * speedX ： 横坐标移动速度
+       * speedY ： 纵坐标移动速度
+       * color ： 填充颜色
+       * */
+      constructor(x,y) {
+        this.x = x
+        this.y = y
+        this.r = Math.random() * 20 + 10
+        this.a = 1
+        this.speedX = (Math.random() - 0.5) * 3
+        this.speedY = (Math.random() - 0.5) * 3
+        this.color = `rgb(${this.random(0,255)},${this.random(0,255)},${this.random(0,255)})`
+      }
+
+      show() {
+        pan.beginPath() //新建路径
+        pan.fillStyle =this.color //设置填充颜色
+        pan.globalAlpha = this.a  //设置透明度
+        pan.arc(this.x, this.y, this.r, 0, Math.PI * 2); //画圆
+        pan.fill()  //填充
+
+        this.move() //设置移动，磨损
+      }
+
+      move() {
+        this.x += this.speedX
+        this.y += this.speedY
+        this.a *= 0.98
+      }
+
+      random(max,min) {
+        return Math.floor(Math.random() * (max - min) + min) 
+      }
+
+    }
+
+    const arcs = [] //原的数组
+    window.onmousemove = function (e) {
+      //鼠标移动就创建圆加入arcs数组
+      arcs.push(new Arc(e.clientX,e.clientY))
+    }
+
+    function rander() {
+      //清空画布
+      pan.clearRect(0,0,canvas.width,canvas.height)
+      //遍历数组调用show方法，画圆
+      arcs.forEach((item,i) => {
+        item.show()
+        //当透明度<0.05 移除这个元素
+        if (item.a <= 0.05) {
+          arcs.splice(i,1)
+        }
+      })
+      //根据显示器刷新频率调用
+      requestAnimationFrame(rander)
+    }
+    rander()
+  </script>
+
+</body>
+</html>
